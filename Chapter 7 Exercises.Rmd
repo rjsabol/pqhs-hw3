@@ -1,0 +1,79 @@
+---
+title: "Chapter 7 Exercise"
+author: "Rachel Sabol"
+date: "March 18, 2018"
+output: pdf_document
+---
+A)
+```{r}
+library(MASS)
+data(Boston)
+fit.lm=lm(nox~poly(dis,3), data=Boston)
+summary(fit.lm)
+
+lims=range(Boston$dis)
+grid=seq(from=lims[1], to=lims[2], by=0.1)
+preds=predict(fit.lm, list(dis=grid))
+
+plot(Boston$nox ~ Boston$dis, col ="darkgrey")
+lines(grid, preds, col ="red", lwd=2)
+
+
+```
+B)
+```{r}
+residual=rep(0,10)
+for (i in 1:10) {
+  fit.lm=lm(nox~poly(dis,i), data=Boston)
+  residual[i]=sum(fit.lm$residuals^2)
+  preds=predict(fit.lm, list(dis=grid))
+  plot(Boston$nox ~ Boston$dis, col ="darkgrey")
+  lines(grid, preds, col ="red", lwd=2)
+}
+residual
+```
+C)
+```{r}
+library(boot)
+test=rep(0,10)
+for (i in 1:10){
+   fit.lm=glm(nox~poly(dis, i), data=Boston)
+   test[i]=cv.glm(Boston, fit.lm)$delta[1]
+   }
+which.min(test)
+```
+The fit with a thrid degree polynomial produces the lowest mean square error through cross validation. 
+
+D)
+```{r}
+library(splines)
+fit.knot=lm(nox~bs(dis,df=4), data=Boston)
+summary(fit.knot)
+attr(bs(Boston$dis, df = 4), "knots")
+
+pred=predict(fit.knot, list(dis=grid))
+plot(nox~dis, data=Boston, col="darkgrey")
+lines(grid, preds, col="red")
+```
+The bs() function selected a knot at about 3.2, which explains 50% of the dis data when the degrees of freedom is set at 4. 
+
+E)
+```{r}
+residual=rep(0,12)
+for (i in 1:10){
+  fit.knot=lm(nox~bs(dis, df=i), data=Boston)
+  residual[i]=sum(fit.knot$residuals^2)
+}
+
+plot(residual)
+```
+```{r}
+test=rep(0,12)
+for (i in 1:12){
+   fit.knot=glm(nox~bs(dis, df=i), data=Boston)
+   test[i]=cv.glm(Boston, fit.knot)$delta[1]
+   }
+which.min(test)
+
+```
+The spline that produces the lowest MSE has 10 degrees of freedom. 

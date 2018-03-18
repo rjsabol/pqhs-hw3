@@ -1,0 +1,73 @@
+---
+title: "Chapter 8 exercise"
+author: "Rachel Sabol"
+date: "March 18, 2018"
+output: pdf_document
+---
+A)
+```{r}
+library(ISLR)
+data("OJ")
+train=sample(1:nrow(OJ),800)
+test=OJ[-train,]
+train=OJ[train,]
+```
+B)
+```{r}
+library(tree)
+tree.OJ=tree(Purchase~.,train)
+summary(tree.OJ)
+```
+As a note, the question asked to exclude the variable "Buy", which was not actually in the dataset. It should not affect the answers to these questions, unless the variable was coded under another name in this version (there is no clear synonymously named variable). The training error rate was 15.62% and the tree has 9 terminal nodes. 
+C)
+```{r}
+tree.OJ
+```
+One of the terminal nodes is defined by a LoyalCH value of less than 0.0608385. 62 observations meet this criteria, and the deviance is 10.24. The predicted outcome for observations in this node is MM. 
+D)
+```{r}
+plot(tree.OJ)
+text(tree.OJ,pretty=0)
+```
+The tree plot displays the nodes and the values that correspond to each split. Impotant variables in the tree are Loyal, SalePrice, PriceDiff, and ListPriceDiff. 4 terminal nodes correspond to MM and five terminal nodes correspond to CH. 
+E)
+```{r}
+tree.pred=predict(tree.OJ,test,type="class")
+table=table(tree.pred, test$Purchase)
+table
+(table[1,1]+table[2,2])/sum(table)
+```
+The test error rate is 20%. 
+F)
+```{r}
+cv.OJ=cv.tree(tree.OJ,FUN=prune.misclass)
+cv.OJ
+```
+
+The tree with 2 nodes has the lowest cross-valiation error rate of 153. 
+
+G)
+```{r}
+plot(cv.OJ$size,cv.OJ$dev,type="b")
+```
+H) 2
+I)
+```{r}
+prune.OJ=prune.tree(tree.OJ,best=2)
+```
+J)
+```{r}
+summary(prune.OJ)
+```
+The training error rate is slightly higher at 18.62%.
+K)
+```{r}
+tree.pred=predict(prune.OJ,test,type="class")
+table=table(tree.pred, test$Purchase)
+table
+(table[1,1]+table[2,2])/sum(table)
+```
+The test error rate is slightly greater than the unpruned tree, but they are almost the same. 
+
+
+
