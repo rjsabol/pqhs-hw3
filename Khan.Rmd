@@ -1,0 +1,58 @@
+---
+title: "Khan"
+author: "rachel sabol"
+date: "April 9, 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## ISLR has a dataset Khan. It contains gene expression data for 4 types of small round blue cell tumors. Use help(Khan) to see details. Apply random forest and boosting to the training set, and tuning the hyperparameters to improve the models. Report your main steps and final results.
+
+**Assemble the data for training and testing**
+```{r}
+library(ISLR)
+library(randomForest)
+
+Khan.train=data.frame(x=Khan$xtrain,y=as.factor(Khan$ytrain))
+Khan.test=data.frame(x=Khan$xtest,y=as.factor(Khan$ytest))
+
+dim(Khan.test);dim(Khan.train)
+
+```
+
+**Apply random forest modeling**
+```{r}
+rf=randomForest(y~.,data=Khan.train,importance=TRUE)
+yhat.rf=predict(rf,newdata=Khan.test)
+```
+```{r}
+summary(yhat.rf)
+plot(rf)
+table(yhat.rf,Khan.test$y)
+```
+
+**Use boosting**
+```{r}
+library(gbm)
+boost=gbm(y~.,data=Khan.train,distribution="multinomial",n.trees=500,interaction.depth=4)
+```
+```{r}
+summary(boost)
+```
+```{r}
+yhat.boost=predict(boost,newdata=Khan.test,n.trees=500)
+table(yhat.rf,Khan.test$y)
+```
+
+Random forest with and without boosting have each made one prediction incorrectly.
+
+```{r}
+plot(boost, i="x.545",main="boost")
+plot(boost, i="x.1003",main="boost")
+plot(boost, i="x.1389",main="boost")
+plot(boost, i="x.1954",main="boost")
+```
+
