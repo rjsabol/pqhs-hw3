@@ -1,0 +1,195 @@
+---
+title: "Chapter 9 Exercise"
+author: "rachel sabol"
+date: "April 9, 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#8. This problem involves the OJ data set which is part of the ISLR package.
+
+**a) Create a training set containing a random sample of 800 observations, and a test set containing the remaining observations.**
+```{r}
+library(ISLR)
+library (e1071)
+set.seed(42)
+train=sample(nrow(OJ),800)
+OJtrain=OJ[train,]
+OJtest=OJ[-train,]
+
+```
+
+**b) Fit a support vector classifier to the training data using cost=0.01, with Purchase as the response and the other variables as predictors. Use the summary() function to produce summary statistics, and describe the results obtained.**
+
+```{r}
+svmfit=svm(Purchase~.,data=OJtrain,kernel="linear",cost=0.01)
+summary(svmfit)
+```
+
+The support vector classifier results in a model with two classes and 429 suppot vectors. 219 belong to level CH, 220 belong to level MM.
+
+**c) What are the training and test error rates?**
+
+```{r}
+pred.train=predict(svmfit,OJtrain)
+table(OJtrain$Purchase,pred.train)
+```
+```{r}
+(78+54)/800
+```
+```{r}
+pred.test=predict(svmfit,OJtest)
+table(OJtest$Purchase,pred.test)
+```
+```{r}
+(29+21)/(150+21+29+70)
+```
+The training error rate is 16.5% and the testing error rate is about 18.5%.
+
+**d) Use the tune() function to select an optimal cost. Consider values in the range 0.01 to 10.**
+
+```{r}
+tune.out=tune(svm,Purchase~.,data=OJtrain,kernel="linear",ranges=list(cost=c(0.01,0.1,1,10)))
+summary(tune.out)
+```
+
+The cost with the lowest error is 1.
+
+**e) Compute the training and test error rates using this new value for cost.**
+
+```{r}
+svmfit=svm(Purchase~.,data=OJtrain,kernel="linear",cost=1)
+summary(svmfit)
+
+pred.train=predict(svmfit,OJtrain)
+table(OJtrain$Purchase,pred.train)
+
+```
+```{r}
+(73+57)/800
+```
+```{r}
+pred.test=predict(svmfit,OJtest)
+table(OJtest$Purchase,pred.test)
+```
+```{r}
+(25+22)/(149+74+25+22)
+```
+
+The new training error is 16.25% and the testing error is 17.4%, a slight improvement over the original cost.
+
+**f) Repeat parts (b) through (e) using a support vector machine with a radial kernel. Use the default value for gamma.**
+
+```{r}
+svmfit=svm(Purchase~.,data=OJtrain,kernel="radial",cost=0.01)
+summary(svmfit)
+```
+
+The support vector classifier results in a model with two classes and 638 suppot vectors. 318 belong to level CH, 320 belong to level MM.
+
+**c) What are the training and test error rates?**
+
+```{r}
+pred.train=predict(svmfit,OJtrain)
+table(OJtrain$Purchase,pred.train)
+```
+```{r}
+(318)/800
+```
+```{r}
+pred.test=predict(svmfit,OJtest)
+table(OJtest$Purchase,pred.test)
+```
+```{r}
+99/200
+```
+The training error rate is about 40% and the testing error rate is 49.5%.
+
+```{r}
+tune.out=tune(svm,Purchase~.,data=OJtrain,kernel="radial",ranges=list(cost=c(0.01,0.1,1,10)))
+summary(tune.out)
+```
+
+The cost with the lowest error is 1.
+
+```{r}
+svmfit=svm(Purchase~.,data=OJtrain,kernel="radial",cost=1)
+summary(svmfit)
+
+pred.train=predict(svmfit,OJtrain)
+table(OJtrain$Purchase,pred.train)
+
+```
+```{r}
+(78+39)/800
+```
+```{r}
+pred.test=predict(svmfit,OJtest)
+table(OJtest$Purchase,pred.test)
+```
+```{r}
+(24+19)/200
+```
+
+The new training error is about 14.6% and the testing error is 21.5%.
+
+g) Repeat parts (b) through (e) using a support vector machine with a polynomial kernel. Set degree=2.
+
+```{r}
+svmfit=svm(Purchase~.,data=OJtrain,kernel="polynomial",degree=2,cost=0.01)
+summary(svmfit)
+```
+
+The support vector classifier results in a model with two classes and 642 suppot vectors. 318 belong to level CH, 324 belong to level MM.
+
+
+```{r}
+pred.train=predict(svmfit,OJtrain)
+table(OJtrain$Purchase,pred.train)
+```
+```{r}
+318/800
+```
+```{r}
+pred.test=predict(svmfit,OJtest)
+table(OJtest$Purchase,pred.test)
+```
+```{r}
+99/200
+```
+The training error rate is about 40% and the testing error rate is 49.5%.
+
+```{r}
+tune.out=tune(svm,Purchase~.,data=OJtrain,kernel="polynomial",degree=2,ranges=list(cost=c(0.01,0.1,1,10)))
+summary(tune.out)
+```
+
+The cost with the lowest error is 10.
+
+
+```{r}
+svmfit=svm(Purchase~.,data=OJtrain,kernel="polynomial",degree=2,cost=10)
+summary(svmfit)
+
+pred.train=predict(svmfit,OJtrain)
+table(OJtrain$Purchase,pred.train)
+
+```
+```{r}
+(80+41)/800
+```
+```{r}
+pred.test=predict(svmfit,OJtest)
+table(OJtest$Purchase,pred.test)
+```
+```{r}
+(29+19)/200
+```
+
+
+h) Overall, which approach seems to give the best results on this data?
+
+While the radial and polynomial approaches fit the training data better, the linear fit has the lowest testing error. The radial and polynomial models are likely overfitting. Therefore, the linear model has the best results. 
